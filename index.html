@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[모록밭 가족여행] 강원도 2박 3일 힐링 투어 - 스마트 가이드</title>
+    
+    <!-- Google tag (gtag.js) - 투어메이커 GA4 기본코드 적용 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JLH9GD9SVR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JLH9GD9SVR');
+    </script>
+
+    <!-- SEO & Open Graph -->
+    <meta name="description" content="모록밭 가족들을 위한 강원도 (강릉, 삼척, 고성) 2박 3일 힐링 여행 스마트 가이드북">
+    <meta property="og:title" content="🌿 [모록밭 가족여행] 강원도 힐링 투어">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1551065961-cb863bf457d5?auto=format&fit=crop&q=80&w=1200">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS (Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .font-title { font-family: 'Nanum Myeongjo', serif; } 
+        .hero-bg { 
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1551065961-cb863bf457d5?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        @media (max-width: 768px){ .hero-bg { background-attachment: scroll; } }
+        #map { height: 500px; width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        section { scroll-margin-top: 80px; }
+        
+        /* Map Customization */
+        .custom-icon div {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            animation: markerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+        }
+        .custom-icon div:hover {
+            transform: scale(1.1);
+            z-index: 100;
+        }
+        @keyframes markerPop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Path Animation */
+        .animated-path {
+            stroke-dasharray: 5000;
+            stroke-dashoffset: 5000;
+            animation: drawLine 3.5s ease-in forwards;
+        }
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* 인쇄 전용 CSS 완벽 최적화 */
+        @media print {
+            @page { size: A4 portrait; margin: 15mm; }
+            body { background-color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .print-break-inside-avoid { break-inside: avoid; }
+            .print\:shadow-none { box-shadow: none !important; }
+            .print\:border-gray-800 { border-color: #1f2937 !important; }
+        }
+    </style>
+</head>
+<body class="antialiased pb-20 md:pb-0">
+
+    <div class="print:hidden">
+
+    <!-- Header (Sticky Navigation) -->
+    <header class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="http://tourmaker.kr" target="_blank">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgHfgIX70O5k6Anuo0UgALIdaG9jSga9auHu3uyz0uEirylGPAJnjN_qQbvEGMUvPqUQf_g9FMNUHRxlDcUBf4vZ3Mpy4TnA9WxbmzWYK11gt2zuy_Irl4wctNFjcjLyPo0GPXV792o_J7L9guRMuDfeC1gy7USwywjYbECZgzcsHybuGRRAXAnO1eNmP8/s320/logo.png" alt="Tourmaker" class="h-8">
+                </a>
+                <span id="d-day-badge" class="hidden bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse"></span>
+            </div>
+            
+            <div class="flex-1 overflow-x-auto no-scrollbar ml-4 md:ml-8">
+                <div class="flex items-center space-x-1 md:space-x-6 whitespace-nowrap pr-4">
+                    <a href="#home" class="px-3 py-2 text-sm font-bold text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">홈</a>
+                    <a href="#highlights" class="px-3 py-2 text-sm font-bold text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-colors"><i class="fa-solid fa-star mr-1 text-amber-500"></i>포인트</a>
+                    <a href="#map-section" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">이동동선</a>
+                    <a href="#schedule" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">세부일정</a>
+                    <a href="#accommodation" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">숙소안내</a>
+                    <a href="#check" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition-colors">준비물</a>
+                </div>
+            </div>
+
+            <button onclick="shareLink()" class="shrink-0 p-2 text-slate-500 hover:text-emerald-600 ml-2"><i class="fa-solid fa-share-nodes text-xl"></i></button>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section id="home" class="hero-bg min-h-[60vh] flex items-center justify-center text-center px-4 relative">
+        <div class="animate-fade-in-up text-white z-10">
+            <span class="bg-emerald-700/90 px-6 py-2 rounded-full text-sm md:text-base font-bold mb-6 inline-block border border-white/20 shadow-lg tracking-wide">👨‍👩‍👧‍👦 전국에서 모이는 18명의 대가족</span>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg font-title">모록밭 가족의<br><span class="text-amber-400 font-bold">강원도 힐링 투어</span></h1>
+            <p class="text-xl md:text-2xl text-white font-bold tracking-wide mb-2">2026. 07. 17(금) ~ 07. 19(일)</p>
+            <p class="text-sm md:text-base text-slate-200 font-medium tracking-wide mt-4 bg-black/40 inline-block px-4 py-1.5 rounded-full">양양공항 & 강릉역 연계 프라이빗 투어</p>
+        </div>
+    </section>
+
+    <!-- Highlights Section -->
+    <section id="highlights" class="py-12 bg-white -mt-8 rounded-t-3xl relative z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10">
+                <span class="text-emerald-600 font-black tracking-widest text-xs uppercase">Tour Points</span>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mt-2 font-title">이번 가족여행의<br class="md:hidden"/> 3가지 특별함</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 text-3xl">✈️</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">극적인 랑데부, 편안한 합류</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        제주에서 오시는 가족분들은 <span class="text-blue-600 font-bold">양양공항</span>에서, 내륙에서 오시는 가족분들은 <span class="text-blue-600 font-bold">강릉역</span>에서 전용 리무진으로 픽업하여 완벽하게 합류합니다.
+                    </p>
+                    <span class="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold">맞춤형 교통 연계</span>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-4 text-3xl">🌊</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">강원도 남북을 아우르는 절경</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        강릉 오죽헌의 전통미, <span class="text-amber-600 font-bold">삼척 대금굴</span>의 신비로움, 그리고 최북단 <span class="text-amber-600 font-bold">고성 통일전망대</span>까지 강원도의 진면목을 모두 담았습니다.
+                    </p>
+                    <span class="inline-block bg-amber-500 text-white text-xs px-2 py-1 rounded font-bold">핵심 명소 투어</span>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4 text-3xl">🚌</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">28인승 리무진 & 프라이빗 숙소</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        장거리 이동에도 피로가 없는 <span class="text-emerald-600 font-bold">최고급 28인승 리무진</span>과 가족들끼리 오붓하게 수영을 즐길 수 있는 펜션(호텔)에서 완벽한 휴식을 취합니다.
+                    </p>
+                    <span class="inline-block bg-emerald-600 text-white text-xs px-2 py-1 rounded font-bold">VVIP 힐링 케어</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flight Info Alert -->
+    <section class="py-6 bg-slate-50">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center">
+                <div class="shrink-0 text-blue-500 text-5xl">
+                    <i class="fa-solid fa-plane-departure"></i>
+                </div>
+                <div class="flex-1 w-full">
+                    <h3 class="font-bold text-lg text-blue-900 mb-3 font-title">제주 ↔ 양양 항공 스케줄 안내</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                            <span class="text-[11px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded">가는 날 (7/17 금)</span>
+                            <p class="text-sm font-bold text-slate-800 mt-2">제주 <i class="fa-solid fa-arrow-right text-slate-400 mx-1"></i> 양양 (WE6702)</p>
+                            <p class="text-lg font-black text-blue-700 mt-1">12:25 ~ 13:40 (예상)</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                            <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded">오는 날 (7/19 일)</span>
+                            <p class="text-sm font-bold text-slate-800 mt-2">양양 <i class="fa-solid fa-arrow-right text-slate-400 mx-1"></i> 제주 (WE6701)</p>
+                            <p class="text-lg font-black text-amber-600 mt-1">15:15 ~ 16:30 (예상)</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-red-500 mt-3 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 국내선 탑승 시 신분증(주민등록증, 운전면허증)을 반드시 지참해 주세요!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map -->
+    <section id="map-section" class="py-12 bg-white border-t border-slate-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight font-title">한눈에 보는 이동 동선</h2>
+                <p class="text-slate-500 mt-2 text-sm">양양, 강릉, 삼척, 고성을 아우르는 알찬 2박 3일 궤적입니다.</p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4 max-w-5xl mx-auto gap-4">
+                <div class="flex bg-slate-100 rounded-full p-1 shadow-sm border border-slate-200">
+                    <button onclick="filterMap('all')" id="btn-map-all" class="px-4 py-1.5 text-sm font-bold rounded-full bg-emerald-600 text-white transition-colors">전체</button>
+                    <button onclick="filterMap('day1')" id="btn-map-day1" class="px-4 py-1.5 text-sm font-bold rounded-full text-slate-600 hover:bg-slate-200 transition-colors">1일차</button>
+                    <button onclick="filterMap('day2')" id="btn-map-day2" class="px-4 py-1.5 text-sm font-bold rounded-full text-slate-600 hover:bg-slate-200 transition-colors">2일차</button>
+                    <button onclick="filterMap('day3')" id="btn-map-day3" class="px-4 py-1.5 text-sm font-bold rounded-full text-slate-600 hover:bg-slate-200 transition-colors">3일차</button>
+                </div>
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200 text-xs font-bold text-slate-700">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#ef4444]"></span>1일(강릉/삼척)</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>2일(삼척/고성)</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span>3일(강릉/양양)</span>
+                </div>
+            </div>
+
+            <div class="max-w-5xl mx-auto border border-slate-200 rounded-2xl p-1 shadow-lg bg-white relative">
+                <div id="map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Schedule -->
+    <section id="schedule" class="py-16 bg-slate-50 border-t border-slate-100">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <div class="flex justify-center items-center gap-3 mb-2">
+                        <h2 class="text-2xl md:text-3xl font-bold font-title">가족여행 세부 일정</h2>
+                        <button onclick="window.print()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-slate-700 transition flex items-center gap-1"><i class="fa-solid fa-print"></i> 일정표 인쇄</button>
+                    </div>
+                    <p class="text-slate-500 text-sm">탭을 눌러 일자별 상세 동선과 식사 계획을 확인하세요.</p>
+                </div>
+
+                <div class="flex overflow-x-auto no-scrollbar gap-2 mb-8 justify-start md:justify-center px-2">
+                    <button class="tab-btn active shrink-0 px-6 py-3 rounded-2xl border-2 border-emerald-600 bg-emerald-600 text-white font-bold text-sm transition" onclick="openTab(event, 'day1')">1일차 (7/17 금)</button>
+                    <button class="tab-btn shrink-0 px-6 py-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm transition" onclick="openTab(event, 'day2')">2일차 (7/18 토)</button>
+                    <button class="tab-btn shrink-0 px-6 py-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm transition" onclick="openTab(event, 'day3')">3일차 (7/19 일)</button>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                    <!-- Day 1 -->
+                    <div id="day1" class="tab-content animate-fade-in-up p-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <span class="text-4xl bg-emerald-100 p-3 rounded-2xl">🤝</span>
+                            <div>
+                                <h3 class="font-bold text-2xl text-slate-800 font-title">반가운 가족 상봉의 날</h3>
+                                <p class="text-emerald-600 font-medium text-sm">양양공항 → 강릉역 → 오죽헌/선교장 → 숙소</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="relative pl-8 border-l-2 border-emerald-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                                <h4 class="font-bold text-lg">13:40 양양국제공항 도착 및 탑승</h4>
+                                <p class="text-slate-500 text-sm mt-1">제주 출발 가족(8명) 12:25 비행기 탑승 후 양양 도착 및 전용 리무진 탑승</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-emerald-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-500"></div>
+                                <h4 class="font-bold text-lg">14:40 강릉역 도착 및 전 가족 상봉!</h4>
+                                <p class="text-slate-500 text-sm mt-1">내륙 출발 가족(10명)과 강릉역 픽업지점에서 반가운 인사 후 투어 시작</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-emerald-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-amber-500"></div>
+                                <h4 class="font-bold text-lg">15:00 늦은 중식 (강릉 명물)</h4>
+                                <p class="text-slate-500 text-sm mt-1">상봉의 기쁨과 함께 즐기는 강릉 초당순두부 마을 또는 장칼국수</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-emerald-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-500"></div>
+                                <h4 class="font-bold text-lg">16:30 오죽헌 & 선교장 관람</h4>
+                                <p class="text-slate-500 text-sm mt-1">조선시대 양반가의 고즈넉한 정취를 느끼며 대가족 단체 사진 촬영</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-emerald-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-orange-500"></div>
+                                <h4 class="font-bold text-lg">18:00 숙소 체크인 및 휴식</h4>
+                                <p class="text-slate-500 text-sm mt-1">강원도 프라이빗 수영장 펜션/호텔 체크인 후 여독 풀기</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-transparent">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-red-500"></div>
+                                <h4 class="font-bold text-lg">19:00 환영 만찬 (바베큐 또는 해산물)</h4>
+                                <p class="text-slate-500 text-sm mt-1">숙소 내 바베큐장 또는 인근 맛집에서 첫날밤의 즐거운 저녁 식사</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Day 2 -->
+                    <div id="day2" class="tab-content hidden animate-fade-in-up p-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <span class="text-4xl bg-blue-100 p-3 rounded-2xl">🌊</span>
+                            <div>
+                                <h3 class="font-bold text-2xl text-slate-800 font-title">신비의 동굴과 최북단 바다</h3>
+                                <p class="text-blue-600 font-medium text-sm">삼척 대금굴 → 중식 → 고성 통일전망대 → 속초 중앙시장</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 mb-4 shadow-sm">
+                                <h5 class="font-bold text-amber-900 text-sm"><i class="fa-solid fa-id-card text-amber-600"></i> 필수 준비물 안내</h5>
+                                <p class="text-xs text-amber-800 mt-1">오후 고성 통일전망대 출입을 위해 성인 및 청소년은 <strong>반드시 신분증</strong>을 지참하셔야 합니다!</p>
+                            </div>
+                            
+                            <div class="relative pl-8 border-l-2 border-blue-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                                <h4 class="font-bold text-lg">08:00 조식 및 숙소 출발</h4>
+                                <p class="text-slate-500 text-sm mt-1">간단한 조식 후 삼척 대금굴을 향해 출발</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-blue-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-indigo-500"></div>
+                                <h4 class="font-bold text-lg">09:30 삼척 대금굴 관람</h4>
+                                <p class="text-slate-500 text-sm mt-1">모노레일을 타고 진입하는 신비로운 천연기념물 동굴 탐험 (사전예약 필수 구간)</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-blue-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-amber-500"></div>
+                                <h4 class="font-bold text-lg">12:00 중식 (삼척항 인근)</h4>
+                                <p class="text-slate-500 text-sm mt-1">신선한 동해안 해산물(대게, 생선회 등)로 점심 식사 후 고성으로 이동</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-blue-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-600"></div>
+                                <h4 class="font-bold text-lg">15:30 고성 통일전망대 관람</h4>
+                                <p class="text-slate-500 text-sm mt-1">동해안 최북단에서 바라보는 금강산과 해금강의 절경 감상</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-blue-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-orange-500"></div>
+                                <h4 class="font-bold text-lg">17:30 속초 관광수산시장 (중앙시장)</h4>
+                                <p class="text-slate-500 text-sm mt-1">닭강정, 아바이순대, 씨앗호떡 등 다양한 먹거리 구경 및 자율 석식</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-transparent">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-slate-500"></div>
+                                <h4 class="font-bold text-lg">19:30 숙소 복귀 및 휴식</h4>
+                                <p class="text-slate-500 text-sm mt-1">긴 이동의 피로를 풀며 가족 간 화합의 시간</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 3 -->
+                    <div id="day3" class="tab-content hidden animate-fade-in-up p-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <span class="text-4xl bg-amber-100 p-3 rounded-2xl">👋</span>
+                            <div>
+                                <h3 class="font-bold text-2xl text-slate-800 font-title">아쉬운 작별, 안전한 귀가</h3>
+                                <p class="text-amber-600 font-medium text-sm">안목해변 → 강릉역 샌딩 → 양양공항 샌딩</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="relative pl-8 border-l-2 border-amber-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-amber-400"></div>
+                                <h4 class="font-bold text-lg">09:00 조식 후 숙소 체크아웃</h4>
+                                <p class="text-slate-500 text-sm mt-1">여유로운 아침 식사 후 짐을 챙겨 전용 버스 탑승</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-amber-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-400"></div>
+                                <h4 class="font-bold text-lg">09:30 강릉 안목해변 커피거리</h4>
+                                <p class="text-slate-500 text-sm mt-1">출발 전 탁 트인 바다를 보며 가족들과 여유로운 모닝 커피 타임</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-amber-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-500"></div>
+                                <h4 class="font-bold text-lg">11:30 중식 (강릉 막국수 등)</h4>
+                                <p class="text-slate-500 text-sm mt-1">여행의 아쉬움을 달래며 다 함께 즐기는 마지막 오찬</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-amber-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-emerald-600"></div>
+                                <h4 class="font-bold text-lg">13:00 강릉역 도착 및 환송</h4>
+                                <p class="text-slate-500 text-sm mt-1">내륙 가족(10명) 강릉역 하차 및 아쉬운 작별 인사</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-amber-200">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500"></div>
+                                <h4 class="font-bold text-lg">14:00 양양국제공항 도착</h4>
+                                <p class="text-slate-500 text-sm mt-1">제주 가족(8명) 공항 도착 및 수속 준비</p>
+                            </div>
+                            <div class="relative pl-8 border-l-2 border-transparent">
+                                <div class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-red-500"></div>
+                                <h4 class="font-bold text-lg">15:15 양양 출발 (파라타항공 WE6701)</h4>
+                                <p class="text-slate-500 text-sm mt-1">16:30 제주 무사 도착을 기원하며 가족 여행 종료!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accommodation Section -->
+    <section id="accommodation" class="py-16 bg-white border-t border-slate-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10">
+                <span class="text-emerald-500 font-black tracking-widest text-xs uppercase">Accommodation</span>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mt-2 font-title">프라이빗 힐링 공간</h2>
+                <p class="text-slate-500 mt-2 text-sm">가족들이 함께 수영을 즐기고 편안하게 쉴 수 있는 맞춤형 숙소입니다.</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto bg-slate-50 rounded-3xl border border-slate-200 shadow-md overflow-hidden flex flex-col md:flex-row">
+                <div class="w-full md:w-5/12 h-64 md:h-auto bg-slate-200 relative">
+                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1000" alt="수영장 펜션/리조트 이미지" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                        <span class="text-white font-bold text-sm drop-shadow-md"><i class="fa-solid fa-swimming-pool mr-1"></i> 수영장 완비 펜션/호텔</span>
+                    </div>
+                </div>
+                
+                <div class="w-full md:w-7/12 p-8 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-emerald-700 text-white text-xs font-bold px-2 py-1 rounded">가족 전용</span>
+                        <h3 class="text-xl md:text-2xl font-bold text-slate-800">강원도 프리미엄 리조트/풀빌라</h3>
+                    </div>
+                    
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4 text-justify">
+                        전국에서 모인 대가족이 오붓하게 시간을 보낼 수 있도록 동해안 인근의 프라이빗한 숙소를 준비합니다. 어린아이들부터 어르신까지 모두 만족할 수 있는 수영장 및 바베큐 시설이 완비된 곳으로 배정됩니다.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-slate-200 pt-5 mt-2">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <i class="fa-solid fa-water text-emerald-500 w-5 text-center"></i> 가족 전용 수영장
+                        </div>
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <i class="fa-solid fa-fire text-amber-500 w-5 text-center"></i> 야외 바베큐 시설
+                        </div>
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <i class="fa-solid fa-bus text-blue-500 w-5 text-center"></i> 28인승 주차 공간
+                        </div>
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <i class="fa-solid fa-bed text-indigo-500 w-5 text-center"></i> 다인용 쾌적한 침구
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist & Memo -->
+    <section id="check" class="py-16 bg-slate-50 border-t border-slate-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl font-bold text-slate-800 font-title">🎒 가족여행 필수 준비물</h2>
+                <p class="text-sm text-slate-500 mt-1">오랜만의 대가족 여행, 빠진 것이 없는지 체크해 보세요!</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-emerald-900">✅ 짐싸기 체크리스트</h3>
+                        <button onclick="resetChecklist()" class="text-xs text-slate-500 underline hover:text-red-500 transition-colors bg-slate-50 px-2 py-1 rounded border border-slate-200">[초기화]</button>
+                    </div>
+                    <div id="checklist-container" class="space-y-2">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+                <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-amber-900">📝 여행 메모장</h3>
+                    <textarea id="travel-memo" class="w-full h-64 bg-white p-4 rounded-lg border border-amber-200 text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="각 가족별 분담금, 꼭 챙겨야 할 약, 어르신들 드실 간식 목록 등을 자유롭게 메모해 두세요! (자동 저장됩니다)"></textarea>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background-color: #f8f9fa;" class="py-12 border-t border-slate-200">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex flex-col items-center justify-center mb-6">
+                <a href="http://tourmaker.kr" target="_blank" class="inline-block bg-white border border-slate-300 rounded-xl px-6 py-3 hover:shadow-md transition-shadow mb-6">
+                    <div class="flex items-center gap-3">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgHfgIX70O5k6Anuo0UgALIdaG9jSga9auHu3uyz0uEirylGPAJnjN_qQbvEGMUvPqUQf_g9FMNUHRxlDcUBf4vZ3Mpy4TnA9WxbmzWYK11gt2zuy_Irl4wctNFjcjLyPo0GPXV792o_J7L9guRMuDfeC1gy7USwywjYbECZgzcsHybuGRRAXAnO1eNmP8/s320/logo.png" alt="Tourmaker" class="h-6">
+                        <span class="text-sm font-bold text-slate-700">홈페이지 바로가기 <i class="fa-solid fa-chevron-right text-xs"></i></span>
+                    </div>
+                </a>
+            </div>
+            
+            <p style="font-size: 13px; color: #6c757d; text-align: center;" class="font-normal mb-8 max-w-2xl mx-auto leading-relaxed">
+                [System Powered by TOURMAKER] 본 스마트 가이드북은 **투어메이커**의 기획과 <a href="http://tourmaker.kr" target="_blank" style="font-weight: bold; color: #6c757d; text-decoration: underline; text-underline-offset: 2px;">투어메이커</a>의 트래블 테크 기술 제휴로 제작되었습니다.
+            </p>
+            <p class="text-[10px] text-slate-300">&copy; 2026 Tourmaker Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    </div> <!-- Web 뷰어 래퍼 종료 -->
+
+    <!-- ★ 인쇄 전용 (A4) 레이아웃 ★ -->
+    <div class="hidden print:flex print:flex-col print:w-full bg-white text-black font-sans print-break-inside-avoid">
+        
+        <!-- Header: 로고 & 타이틀 -->
+        <div class="flex justify-between items-end border-b-2 border-gray-800 pb-3 mb-5">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgHfgIX70O5k6Anuo0UgALIdaG9jSga9auHu3uyz0uEirylGPAJnjN_qQbvEGMUvPqUQf_g9FMNUHRxlDcUBf4vZ3Mpy4TnA9WxbmzWYK11gt2zuy_Irl4wctNFjcjLyPo0GPXV792o_J7L9guRMuDfeC1gy7USwywjYbECZgzcsHybuGRRAXAnO1eNmP8/s320/logo.png" alt="Tourmaker Logo" class="h-8">
+            <div class="text-right">
+                <h1 class="text-3xl font-bold font-title text-gray-900 leading-tight">[모록밭 가족여행] 강원도 힐링투어</h1>
+                <p class="text-sm text-gray-600 mt-1 font-bold">세부 일정표 (2박 3일 / 18명)</p>
+            </div>
+        </div>
+
+        <!-- 행사 개요 박스 -->
+        <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg mb-5 print:shadow-none">
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div><span class="font-bold text-gray-700 w-16 inline-block">행사일정:</span> 2026. 07. 17 (금) ~ 07. 19 (일)</div>
+                <div><span class="font-bold text-gray-700 w-16 inline-block">탐방지역:</span> 강릉, 삼척, 고성, 속초 일원</div>
+                <div><span class="font-bold text-gray-700 w-16 inline-block">항공/차량:</span> 파라타항공 / 최고급 28인승 리무진</div>
+                <div><span class="font-bold text-gray-700 w-16 inline-block">지정숙소:</span> 강원도 내 프리미엄 풀빌라/펜션</div>
+            </div>
+        </div>
+        
+        <!-- 상세 일정표 -->
+        <table class="w-full text-sm border-collapse border-2 border-gray-800 mb-6 flex-grow">
+            <thead>
+                <tr class="bg-gray-100 text-center text-gray-800">
+                    <th class="border border-gray-400 p-2 w-[12%]">일자</th>
+                    <th class="border border-gray-400 p-2 w-[15%]">시간</th>
+                    <th class="border border-gray-400 p-2 w-[60%]">상세 일정 및 체험 내용</th>
+                    <th class="border border-gray-400 p-2 w-[13%]">식사</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Day 1 -->
+                <tr>
+                    <td class="border border-gray-400 p-3 text-center font-bold align-middle bg-gray-50" rowspan="6">
+                        1일차<br><span class="text-xs font-normal text-gray-600">(7/17 금)</span>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">13:40</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-blue-700">제주팀 양양공항 도착 및 리무진 탑승</strong>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center text-gray-700 align-middle" rowspan="6">
+                        <div class="space-y-2 text-xs">
+                            <p><span class="font-bold text-gray-800">조:</span> -</p>
+                            <p><span class="font-bold text-gray-800">중:</span> 초당순두부등</p>
+                            <p><span class="font-bold text-gray-800">석:</span> 바베큐/해산물</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">14:40</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-emerald-700">강릉역 내륙팀 합류 및 전 가족 상봉</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">15:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>강릉 명물 늦은 중식</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">16:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>오죽헌 & 선교장 관람</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">18:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>숙소 체크인 및 휴식</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">19:00</td>
+                    <td class="border border-gray-400 p-2 bg-slate-50">
+                        <strong class="text-gray-800">환영 만찬 및 저녁 식사</strong>
+                    </td>
+                </tr>
+
+                <!-- Day 2 -->
+                <tr>
+                    <td class="border border-gray-400 p-3 text-center font-bold align-middle bg-gray-50" rowspan="6">
+                        2일차<br><span class="text-xs font-normal text-gray-600">(7/18 토)</span>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">08:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>조식 및 숙소 출발</strong>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center text-gray-700 align-middle" rowspan="6">
+                        <div class="space-y-2 text-xs">
+                            <p><span class="font-bold text-gray-800">조:</span> 숙소/가정식</p>
+                            <p><span class="font-bold text-gray-800">중:</span> 삼척항 회/대게</p>
+                            <p><span class="font-bold text-gray-800">석:</span> 속초시장(자율)</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">09:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-indigo-700">삼척 대금굴 모노레일 관람 (예약 필수)</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">12:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>삼척항 인근 중식 및 고성으로 이동</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">15:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-red-600">고성 통일전망대 (※신분증 지참 필수)</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">17:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>속초 중앙시장 투어 및 자율 석식</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">19:30</td>
+                    <td class="border border-gray-400 p-2 bg-slate-50">
+                        <strong class="text-gray-800">숙소 복귀 및 가족 화합의 밤</strong>
+                    </td>
+                </tr>
+
+                <!-- Day 3 -->
+                <tr>
+                    <td class="border border-gray-400 p-3 text-center font-bold align-middle bg-gray-50" rowspan="6">
+                        3일차<br><span class="text-xs font-normal text-gray-600">(7/19 일)</span>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">09:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>조식 후 체크아웃, 전용차량 탑승</strong>
+                    </td>
+                    <td class="border border-gray-400 p-2 text-center text-gray-700 align-middle" rowspan="6">
+                        <div class="space-y-2 text-xs">
+                            <p><span class="font-bold text-gray-800">조:</span> 숙소/가정식</p>
+                            <p><span class="font-bold text-gray-800">중:</span> 현지식</p>
+                            <p><span class="font-bold text-gray-800">석:</span> -</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">09:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-blue-700">강릉 안목해변 커피거리 자유시간</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">11:30</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong>강릉 현지식 중식 (막국수 등)</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">13:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-emerald-700">강릉역 도착 및 내륙팀(10명) 샌딩</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">14:00</td>
+                    <td class="border border-gray-400 p-2">
+                        <strong class="text-blue-700">양양공항 도착 및 제주팀(8명) 수속</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-400 p-2 text-center font-semibold text-gray-700">15:15</td>
+                    <td class="border border-gray-400 p-2 bg-slate-50">
+                        <strong>양양 출발 (WE6701) / 투어 종료</strong>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 하단 보조 정보 (비상연락망 & 준비물) -->
+        <div class="grid grid-cols-2 gap-6 mb-4">
+            <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 print:shadow-none">
+                <h3 class="font-bold text-red-600 text-sm mb-2 border-b border-gray-300 pb-1">⚠️ 신분증 지참 필수 (매우 중요)</h3>
+                <p class="text-xs text-gray-700 mt-2 leading-relaxed">
+                    국내선 항공(제주-양양) 탑승 시와 고성 통일전망대 출입소를 통과할 때 모든 성인/청소년 참가자는 반드시 실물 신분증(주민등록증, 운전면허증 등)을 제시해야 합니다. 여행 출발 전 반드시 확인 부탁드립니다.
+                </p>
+            </div>
+            <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 print:shadow-none">
+                <h3 class="font-bold text-gray-800 text-sm mb-2 border-b border-gray-300 pb-1">🎒 가족여행 준비물</h3>
+                <ul class="text-xs text-gray-700 space-y-1 mt-2 list-disc pl-4">
+                    <li>숙소 수영장 이용을 위한 수영복 및 비치웨어</li>
+                    <li>여름철 땀 배출을 위한 여벌 옷, 편한 운동화</li>
+                    <li>차량 이동 시 에어컨 바람막이용 얇은 겉옷</li>
+                    <li>개인 상비약 (어르신 복용약, 멀미약 등)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-auto pt-4 border-t border-gray-300 text-center">
+            <p style="font-size: 11px; color: #6c757d; margin-bottom: 4px;">
+                [System Powered by TOURMAKER] 본 스마트 가이드북은 <strong>투어메이커</strong>의 기획과 투어메이커의 트래블 테크 기술 제휴로 제작되었습니다.
+            </p>
+            <p class="text-[10px] text-gray-400">&copy; 2026 Tourmaker Inc. All rights reserved. | tourmaker.kr</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function openTab(evt, tabId){
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active','bg-emerald-600','text-white','border-emerald-600');
+                btn.classList.add('bg-white','text-slate-500','border-slate-200');
+            });
+            document.getElementById(tabId)?.classList.remove('hidden');
+            evt.currentTarget.classList.add('active','bg-emerald-600','text-white','border-emerald-600');
+            evt.currentTarget.classList.remove('bg-white','text-slate-500','border-slate-200');
+        }
+
+        function shareLink(){
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({ title: '[모록밭] 강원도 2박3일 가족여행', url }).catch(()=>{});
+            } else {
+                navigator.clipboard?.writeText(url).then(()=>alert('링크가 복사되었습니다. 가족 카톡방에 공유해주세요.'));
+            }
+        }
+
+        // Checklist Logic
+        const CHECK_KEY = 'family_tour_checklist'; 
+        const CHECK_ITEMS = [
+            '★ 신분증 (항공 탑승 및 통일전망대 절대 필수) ★',
+            '수영복 및 물안경 (숙소 수영장 이용)',
+            '여벌 옷, 속옷, 양말',
+            '많이 걸어도 발이 편한 운동화',
+            '여름철 차량 에어컨 대비 얇은 겉옷',
+            '세면도구 (칫솔, 치약 등 개인용품)',
+            '개인 상비약 (어르신 처방약, 멀미약)',
+            '핸드폰 보조배터리 및 충전기',
+            '선크림, 선글라스, 모자'
+        ];
+
+        function renderChecklist(){
+            const container = document.getElementById('checklist-container');
+            if(!container) return;
+            const saved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+            container.innerHTML = CHECK_ITEMS.map((label, idx) => {
+                const id = `chk_fam_${idx}`;
+                const checked = saved[id] ? 'checked' : '';
+                const isImportant = label.includes('★');
+                const labelClass = isImportant ? 'text-sm font-bold text-red-600' : 'text-sm text-slate-700';
+                return `
+                    <label class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-emerald-50 transition">
+                        <input type="checkbox" id="${id}" ${checked} class="h-4 w-4 text-emerald-600 rounded focus:ring-emerald-500">
+                        <span class="${labelClass}">${label}</span>
+                    </label>
+                `;
+            }).join('');
+
+            container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const currentSaved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+                    currentSaved[cb.id] = cb.checked;
+                    localStorage.setItem(CHECK_KEY, JSON.stringify(currentSaved));
+                });
+            });
+        }
+        
+        function resetChecklist(){
+            if(confirm('체크리스트를 초기화하시겠습니까?')){
+                localStorage.removeItem(CHECK_KEY);
+                renderChecklist();
+            }
+        }
+
+        renderChecklist();
+
+        // Memo Logic
+        (function(){
+            const memo = document.getElementById('travel-memo');
+            if(!memo) return;
+            const KEY = 'family_tour_memo';
+            memo.value = localStorage.getItem(KEY) || '';
+            memo.addEventListener('input', () => {
+                localStorage.setItem(KEY, memo.value);
+            });
+        })();
+
+        // Map Logic
+        let map;
+        let mapInited = false;
+        let mapLayers = {};
+
+        function initMap(){
+            if(mapInited || !window.L) return;
+            mapInited = true;
+            
+            // 좌표 (양양, 강릉, 삼척, 고성)
+            const spots = {
+                yangyang: [38.0613, 128.6694], 
+                gangneungSt: [37.7637, 128.8996], 
+                ojukheon: [37.7792, 128.8794], 
+                samcheok: [37.3235, 129.0536], 
+                goseong: [38.5828, 128.3756], 
+                sokcho: [38.2070, 128.5918] 
+            };
+
+            map = L.map('map', { scrollWheelZoom:false });
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            mapLayers.day1 = L.featureGroup();
+            mapLayers.day2 = L.featureGroup();
+            mapLayers.day3 = L.featureGroup();
+
+            const c1 = '#ef4444'; // Red (Day 1)
+            const c2 = '#22c55e'; // Green (Day 2)
+            const c3 = '#3b82f6'; // Blue (Day 3)
+
+            // Day 1: 양양 -> 강릉역 -> 오죽헌
+            L.polyline([spots.yangyang, spots.gangneungSt, spots.ojukheon], { color: c1, weight: 4, opacity: 0.8, className: 'animated-path' }).addTo(mapLayers.day1);
+            // Day 2: 강릉(가상 숙소) -> 삼척 -> 속초 -> 고성
+            L.polyline([spots.ojukheon, spots.samcheok, spots.sokcho, spots.goseong], { color: c2, weight: 4, opacity: 0.8, className: 'animated-path' }).addTo(mapLayers.day2);
+            // Day 3: 오죽헌 -> 강릉역 -> 양양
+            L.polyline([spots.ojukheon, spots.gangneungSt, spots.yangyang], { color: c3, weight: 4, opacity: 0.8, className: 'animated-path' }).addTo(mapLayers.day3);
+
+            const createMarker = (latlng, title, color, iconHtml, group) => {
+                const icon = L.divIcon({
+                    className: 'custom-icon',
+                    html: `<div style="background-color:${color}; width:32px; height:32px; border-radius:50%; border:2px solid white; color:white; display:flex; align-items:center; justify-content:center; font-size:14px;">${iconHtml}</div>`,
+                    iconSize: [32, 32]
+                });
+                L.marker(latlng, {icon: icon}).bindPopup(`<b style="font-family:'Noto Sans KR', sans-serif;">${title}</b>`).addTo(group);
+            };
+
+            createMarker(spots.yangyang, '양양국제공항 (제주 합류/샌딩)', c1, '✈️', mapLayers.day1);
+            createMarker(spots.gangneungSt, '강릉역 (내륙 합류/샌딩)', c1, '🚆', mapLayers.day1);
+            createMarker(spots.ojukheon, '강릉 (숙소 및 오죽헌)', c1, '🏡', mapLayers.day1);
+
+            createMarker(spots.samcheok, '삼척 대금굴', c2, '⛰️', mapLayers.day2);
+            createMarker(spots.goseong, '고성 통일전망대', c2, '🔭', mapLayers.day2);
+            createMarker(spots.sokcho, '속초 중앙시장', c2, '🦑', mapLayers.day2);
+
+            mapLayers.day1.addTo(map);
+            mapLayers.day2.addTo(map);
+            mapLayers.day3.addTo(map);
+
+            const bounds = L.featureGroup([mapLayers.day1, mapLayers.day2, mapLayers.day3]).getBounds();
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+
+        window.filterMap = function(day) {
+            if(!map) return;
+
+            ['all', 'day1', 'day2', 'day3'].forEach(d => {
+                const btn = document.getElementById(`btn-map-${d}`);
+                if(d === day) {
+                    btn.classList.remove('text-slate-600', 'hover:bg-slate-200');
+                    btn.classList.add('bg-emerald-600', 'text-white');
+                } else {
+                    btn.classList.add('text-slate-600', 'hover:bg-slate-200');
+                    btn.classList.remove('bg-emerald-600', 'text-white');
+                }
+            });
+
+            map.removeLayer(mapLayers.day1);
+            map.removeLayer(mapLayers.day2);
+            map.removeLayer(mapLayers.day3);
+
+            let boundsToFit;
+            
+            if(day === 'all') {
+                mapLayers.day1.addTo(map);
+                mapLayers.day2.addTo(map);
+                mapLayers.day3.addTo(map);
+                boundsToFit = L.featureGroup([mapLayers.day1, mapLayers.day2, mapLayers.day3]).getBounds();
+            } else {
+                mapLayers[day].addTo(map);
+                boundsToFit = mapLayers[day].getBounds();
+            }
+            
+            map.flyToBounds(boundsToFit, { padding: [30, 30], maxZoom: 11, duration: 1.5, easeLinearity: 0.25 });
+        };
+
+        const depart = new Date('2026-07-17');
+        const diff = Math.ceil((depart - new Date()) / (1000*60*60*24));
+        const badge = document.getElementById('d-day-badge');
+        if(badge) {
+            badge.textContent = diff > 0 ? `D-${diff}` : (diff === 0 ? 'D-DAY' : `D+${Math.abs(diff)}`);
+            badge.classList.remove('hidden');
+        }
+
+        const io = new IntersectionObserver((entries)=>{
+            if(entries[0].isIntersecting) { initMap(); io.disconnect(); }
+        }, { threshold: 0.1 });
+        io.observe(document.getElementById('map-section'));
+    </script>
+</body>
+</html>
